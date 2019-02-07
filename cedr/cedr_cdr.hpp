@@ -56,8 +56,13 @@ struct CDR {
     // ProblemType is 'nonnegative'.
     const Real& Qm_min, const Real& Qm_max,
     // If mass conservation is requested, provide the previous Qm, which will be
-    // summed to give the desired global mass.
+    // summed to give the desired global mass. Providing values here means the
+    // desired global mass is computed in the same reduction as the other
+    // quantities for maximum efficiency. However, not all callers can provide
+    // these data; see set_Qm_global() for an alternative.
     const Real Qm_prev = std::numeric_limits<Real>::infinity()) const = 0;
+
+  virtual void set_Qm_global(const Real& Qm_prev_global) const = 0;
 
   // Run the QLT algorithm with the values set by set_{rho,Q}. It is an error to
   // call this function from a parallel region.
