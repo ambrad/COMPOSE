@@ -338,12 +338,14 @@ struct Input {
 Int run_unit_and_randomized_tests(const Parallel::Ptr& p, const Input& in);
 
 Int test_qlt(const Parallel::Ptr& p, const tree::Node::Ptr& tree, const Int& ncells,
-             const Int nrepeat = 1,
+             const Int nrepeat,
              // Diagnostic output for dev and illustration purposes. To be
              // clear, no QLT unit test requires output to be checked; each
              // checks in-memory data and returns a failure count.
-             const bool write = false,
-             const bool verbose = false);
+             const bool write,
+             // Provide memory to QLT for its buffers.
+             const bool external_memory,
+             const bool verbose);
 } // namespace test
 } // namespace qlt
 } // namespace cedr

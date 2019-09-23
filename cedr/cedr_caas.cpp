@@ -268,9 +268,10 @@ struct TestCAAS : public cedr::test::TestRandomized {
   };
 
   TestCAAS (const mpi::Parallel::Ptr& p, const Int& ncells,
-            const bool use_own_reducer, const bool verbose)
+            const bool use_own_reducer, const bool external_memory,
+            const bool verbose)
     : TestRandomized("CAAS", p, ncells, verbose),
-      p_(p)
+      p_(p), external_memory_(external_memory)
   {
     const auto np = p->size(), rank = p->rank();
     nlclcells_ = ncells / np;
@@ -317,6 +318,7 @@ struct TestCAAS : public cedr::test::TestRandomized {
 
 private:
   mpi::Parallel::Ptr p_;
+  bool external_memory_;
   Int nlclcells_;
   CAAST::Ptr caas_;
 
@@ -334,8 +336,10 @@ Int unittest (const mpi::Parallel::Ptr& p) {
   for (Int nlclcells : {1, 2, 4, 11}) {
     Long ncells = np*nlclcells;
     if (ncells > np) ncells -= np/2;
-    nerr += TestCAAS(p, ncells, false, false).run<TestCAAS::CAAST>(1, false);
-    nerr += TestCAAS(p, ncells, true, false).run<TestCAAS::CAAST>(1, false);
+    for (const bool own_reducer : {false, true})
+      for (const bool external_memory : {false, true})
+        nerr += TestCAAS(p, ncells, own_reducer, external_memory, false)
+          .run<TestCAAS::CAAST>(1, false);
   }
   return nerr;
 }

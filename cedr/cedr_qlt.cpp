@@ -977,9 +977,9 @@ public:
   typedef QLT<Kokkos::DefaultExecutionSpace> QLTT;
 
   TestQLT (const Parallel::Ptr& p, const tree::Node::Ptr& tree,
-           const Int& ncells, const bool verbose=false)
+           const Int& ncells, const bool external_memory, const bool verbose)
     : TestRandomized("QLT", p, ncells, verbose),
-      qlt_(p, ncells, tree), tree_(tree)
+      qlt_(p, ncells, tree), tree_(tree), external_memory_(external_memory)
   {
     if (verbose) qlt_.print(std::cout);
     init();
@@ -988,6 +988,7 @@ public:
 private:
   QLTT qlt_;
   tree::Node::Ptr tree_;
+  bool external_memory_;
 
   CDR& get_cdr () override { return qlt_; }
 
@@ -1052,8 +1053,9 @@ private:
 // Test all QLT variations and situations.
 Int test_qlt (const Parallel::Ptr& p, const tree::Node::Ptr& tree,
               const Int& ncells, const Int nrepeat,
-              const bool write, const bool verbose) {
-  return TestQLT(p, tree, ncells, verbose).run<TestQLT::QLTT>(nrepeat, write);
+              const bool write, const bool external_memory, const bool verbose) {
+  return TestQLT(p, tree, ncells, external_memory, verbose)
+    .run<TestQLT::QLTT>(nrepeat, write);
 }
 } // namespace test
 
@@ -1210,19 +1212,22 @@ Int unittest_QLT (const Parallel::Ptr& p, const bool write_requested=false) {
   const Mesh::ParallelDecomp::Enum dists[] = { Mesh::ParallelDecomp::contiguous,
                                                Mesh::ParallelDecomp::pseudorandom };
   Int nerr = 0;
-  for (size_t is = 0, islim = sizeof(szs)/sizeof(*szs); is < islim; ++is)
-    for (size_t id = 0, idlim = sizeof(dists)/sizeof(*dists); id < idlim; ++id)
-    for (bool imbalanced: {false, true}) {
-      if (p->amroot()) {
-        std::cout << " (" << szs[is] << ", " << id << ", " << imbalanced << ")";
-        std::cout.flush();
+  for (size_t is = 0, islim = sizeof(szs)/sizeof(*szs); is < islim; ++is) {
+    for (size_t id = 0, idlim = sizeof(dists)/sizeof(*dists); id < idlim; ++id) {
+      for (bool imbalanced: {false, true}) {
+        const auto external_memory = imbalanced;
+        if (p->amroot()) {
+          std::cout << " (" << szs[is] << ", " << id << ", " << imbalanced << ")";
+          std::cout.flush();
+        }
+        Mesh m(szs[is], p, dists[id]);
+        tree::Node::Ptr tree = make_tree(m, imbalanced);
+        const bool write = (write_requested && m.ncell() < 3000 &&
+                            is == islim-1 && id == idlim-1);
+        nerr += test::test_qlt(p, tree, m.ncell(), 1, write, external_memory, false);
       }
-      Mesh m(szs[is], p, dists[id]);
-      tree::Node::Ptr tree = make_tree(m, imbalanced);
-      const bool write = (write_requested && m.ncell() < 3000 &&
-                          is == islim-1 && id == idlim-1);
-      nerr += test::test_qlt(p, tree, m.ncell(), 1, write);
     }
+  }
   return nerr;
 }
 
@@ -1254,7 +1259,7 @@ Int run_unit_and_randomized_tests (const Parallel::Ptr& p, const Input& in) {
     Timer::start(Timer::total); Timer::start(Timer::tree);
     tree::Node::Ptr tree = make_tree(m, false);
     Timer::stop(Timer::tree);
-    test::test_qlt(p, tree, in.ncells, in.nrepeat, false, in.verbose);
+    test::test_qlt(p, tree, in.ncells, in.nrepeat, false, false, in.verbose);
     Timer::stop(Timer::total);
     if (p->amroot()) Timer::print();
   }
