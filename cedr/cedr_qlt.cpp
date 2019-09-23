@@ -516,9 +516,19 @@ void QLT<ES>::MetaData::init (const MetaDataBuilder& mdb) {
 }
 
 template <typename ES>
-void QLT<ES>::BulkData::init (const MetaData& md, const Int& nslots) {
-  l2r_data_ = RealList("QLT l2r_data", md.a_h.prob2bl2r[md.nprobtypes]*nslots);
-  r2l_data_ = RealList("QLT r2l_data", md.a_h.prob2br2l[md.nprobtypes]*nslots);
+void QLT<ES>::BulkData::init (const size_t& l2r_sz, const size_t& r2l_sz) {
+  l2r_data_ = RealList("QLT l2r_data", l2r_sz);
+  r2l_data_ = RealList("QLT r2l_data", r2l_sz);
+  l2r_data = l2r_data_;
+  r2l_data = r2l_data_;
+  inited_ = true;
+}
+
+template <typename ES>
+void QLT<ES>::BulkData::init (Real* buf1, const size_t& l2r_sz,
+                              Real* buf2, const size_t& r2l_sz) {
+  l2r_data_ = RealList(buf1, l2r_sz);
+  r2l_data_ = RealList(buf2, r2l_sz);
   l2r_data = l2r_data_;
   r2l_data = r2l_data_;
   inited_ = true;
@@ -638,16 +648,24 @@ void QLT<ES>::end_tracer_declarations () {
 
 template <typename ES>
 void QLT<ES>::get_buffers_sizes (size_t& buf1, size_t& buf2) {
+  const auto nslots = ns_->nslots;
+  buf1 = md_.a_h.prob2bl2r[md_.nprobtypes]*nslots;
+  buf2 = md_.a_h.prob2br2l[md_.nprobtypes]*nslots;
 }
 
 template <typename ES>
 void QLT<ES>::set_buffers (Real* buf1, Real* buf2) {
+  size_t l2r_sz, r2l_sz;
+  get_buffers_sizes(l2r_sz, r2l_sz);
+  bd_.init(buf1, l2r_sz, buf2, r2l_sz);
 }
 
 template <typename ES>
 void QLT<ES>::finish_setup () {
-  cedr_assert( ! bd_.inited());
-  bd_.init(md_, ns_->nslots);
+  if (bd_.inited()) return;
+  size_t l2r_sz, r2l_sz;
+  get_buffers_sizes(l2r_sz, r2l_sz);
+  bd_.init(l2r_sz, r2l_sz);
 }
 
 template <typename ES>
@@ -989,6 +1007,7 @@ private:
   QLTT qlt_;
   tree::Node::Ptr tree_;
   bool external_memory_;
+  typename QLTT::RealList buf1_, buf2_;
 
   CDR& get_cdr () override { return qlt_; }
 
@@ -1023,6 +1042,13 @@ private:
     for (const auto& t : tracers_)
       qlt_.declare_tracer(t.problem_type, 0);
     qlt_.end_tracer_declarations();
+    size_t l2r_sz, r2l_sz;
+    qlt_.get_buffers_sizes(l2r_sz, r2l_sz);
+    if (external_memory_) {
+      buf1_ = typename QLTT::RealList("buf1", l2r_sz);
+      buf2_ = typename QLTT::RealList("buf2", r2l_sz);
+      qlt_.set_buffers(buf1_.data(), buf2_.data());
+    }
     qlt_.finish_setup();
     cedr_assert(qlt_.get_num_tracers() == static_cast<Int>(tracers_.size()));
     for (size_t i = 0; i < tracers_.size(); ++i) {

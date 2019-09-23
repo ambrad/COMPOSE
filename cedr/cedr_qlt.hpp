@@ -146,6 +146,7 @@ public:
   typedef typename cedr::impl::DeviceType<ExeSpace>::type Device;
   typedef QLT<ExeSpace> Me;
   typedef std::shared_ptr<Me> Ptr;
+  typedef Kokkos::View<Real*, Device> RealList;
   
   // Set up QLT topology and communication data structures based on a tree. Both
   // ncells and tree refer to the global mesh, not just this processor's
@@ -279,7 +280,6 @@ PROTECTED_CUDA:
   };
 
   struct BulkData {
-    typedef Kokkos::View<Real*, Device> RealList;
     typedef cedr::impl::Unmanaged<RealList> UnmanagedRealList;
 
     UnmanagedRealList l2r_data, r2l_data;
@@ -288,7 +288,9 @@ PROTECTED_CUDA:
 
     bool inited () const { return inited_; }
 
-    void init(const MetaData& md, const Int& nslots);
+    void init(const size_t& l2r_sz, const size_t& r2l_sz);
+    void init(Real* l2r_buf, const size_t& l2r_sz,
+              Real* r2l_buf, const size_t& r2l_sz);
 
   private:
     bool inited_;
