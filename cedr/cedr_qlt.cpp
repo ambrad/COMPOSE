@@ -521,6 +521,7 @@ void QLT<ES>::BulkData::init (const MetaData& md, const Int& nslots) {
   r2l_data_ = RealList("QLT r2l_data", md.a_h.prob2br2l[md.nprobtypes]*nslots);
   l2r_data = l2r_data_;
   r2l_data = r2l_data_;
+  inited_ = true;
 }
 
 template <typename ES>
@@ -633,6 +634,19 @@ template <typename ES>
 void QLT<ES>::end_tracer_declarations () {
   md_.init(*mdb_);
   mdb_ = nullptr;
+}
+
+template <typename ES>
+void QLT<ES>::get_buffers_sizes (size_t& buf1, size_t& buf2) {
+}
+
+template <typename ES>
+void QLT<ES>::set_buffers (Real* buf1, Real* buf2) {
+}
+
+template <typename ES>
+void QLT<ES>::finish_setup () {
+  cedr_assert( ! bd_.inited());
   bd_.init(md_, ns_->nslots);
 }
 
@@ -933,6 +947,7 @@ template <typename ES> void QLT<ES>
 
 template <typename ES>
 void QLT<ES>::run () {
+  cedr_assert(bd_.inited());
   Timer::start(Timer::qltrunl2r);
   // Number of data per slot.
   const Int l2rndps = md_.a_h.prob2bl2r[md_.nprobtypes];
@@ -1007,6 +1022,7 @@ private:
     for (const auto& t : tracers_)
       qlt_.declare_tracer(t.problem_type, 0);
     qlt_.end_tracer_declarations();
+    qlt_.finish_setup();
     cedr_assert(qlt_.get_num_tracers() == static_cast<Int>(tracers_.size()));
     for (size_t i = 0; i < tracers_.size(); ++i) {
       const auto pt = qlt_.get_problem_type(i);

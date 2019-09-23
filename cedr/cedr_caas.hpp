@@ -39,6 +39,12 @@ public:
 
   void end_tracer_declarations() override;
 
+  void get_buffers_sizes(size_t& buf1, size_t& buf2) override;
+
+  void set_buffers(Real* buf1, Real* buf2) override;
+
+  void finish_setup() override;
+
   int get_problem_type(const Int& tracer_idx) const override;
 
   Int get_num_tracers() const override;
@@ -78,6 +84,7 @@ protected:
   IntList probs_, t2r_;
   typename IntList::HostMirror probs_h_;
   RealList d_, send_, recv_;
+  bool finished_setup_;
 
   void reduce_globally();
 

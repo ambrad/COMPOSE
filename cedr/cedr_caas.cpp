@@ -38,7 +38,7 @@ template <typename ES>
 CAAS<ES>::CAAS (const mpi::Parallel::Ptr& p, const Int nlclcells,
                 const typename UserAllReducer::Ptr& uar)
   : p_(p), user_reducer_(uar), nlclcells_(nlclcells), nrhomidxs_(0),
-    need_conserve_(false)
+    need_conserve_(false), finished_setup_(false)
 {
   cedr_throw_if(nlclcells == 0, "CAAS does not support 0 cells on a rank.");
   tracer_decls_ = std::make_shared<std::vector<Decl> >();  
@@ -68,6 +68,19 @@ void CAAS<ES>::end_tracer_declarations () {
   }
   Kokkos::deep_copy(probs_, probs_h_);
   tracer_decls_ = nullptr;
+}
+
+template <typename ES>
+void CAAS<ES>::get_buffers_sizes (size_t& buf1, size_t& buf2) {
+}
+
+template <typename ES>
+void CAAS<ES>::set_buffers (Real* buf1, Real* buf2) {
+}
+
+template <typename ES>
+void CAAS<ES>::finish_setup () {
+  cedr_assert( ! finished_setup_);
   // (rho, Qm, Qm_min, Qm_max, [Qm_prev])
   const Int e = need_conserve_ ? 1 : 0;
   d_ = RealList("CAAS data", nlclcells_ * ((3+e)*probs_.size() + 1));
@@ -75,6 +88,7 @@ void CAAS<ES>::end_tracer_declarations () {
   // (e'Qm_clip, e'Qm, e'Qm_min, e'Qm_max, [e'Qm_prev])
   send_ = RealList("CAAS send", nslots*(user_reducer_ ? nlclcells_ : 1));
   recv_ = RealList("CAAS recv", nslots);
+  finished_setup_ = true;
 }
 
 template <typename ES>
@@ -218,6 +232,7 @@ void CAAS<ES>::finish_locally () {
 
 template <typename ES>
 void CAAS<ES>::run () {
+  cedr_assert(finished_setup_);
   reduce_locally();
   const bool user_reduces = user_reducer_ != nullptr;
   if (user_reduces)
@@ -293,6 +308,7 @@ struct TestCAAS : public cedr::test::TestRandomized {
     }
     tracers_ = tracers;
     caas_->end_tracer_declarations();
+    caas_->finish_setup();
   }
 
   void run_impl (const Int trial) override {

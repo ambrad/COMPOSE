@@ -172,6 +172,12 @@ public:
 
   void end_tracer_declarations() override;
 
+  void get_buffers_sizes(size_t& buf1, size_t& buf2) override;
+
+  void set_buffers(Real* buf1, Real* buf2) override;
+
+  void finish_setup() override;
+
   int get_problem_type(const Int& tracer_idx) const override;
 
   Int get_num_tracers() const override;
@@ -278,9 +284,14 @@ PROTECTED_CUDA:
 
     UnmanagedRealList l2r_data, r2l_data;
 
+    BulkData () : inited_(false) {}
+
+    bool inited () const { return inited_; }
+
     void init(const MetaData& md, const Int& nslots);
 
   private:
+    bool inited_;
     RealList l2r_data_, r2l_data_;
   };
 
