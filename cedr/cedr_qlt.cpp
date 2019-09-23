@@ -113,7 +113,7 @@ Int init_tree (const Int& my_rank, const tree::Node::Ptr& node, Int& id) {
     depth = std::max(depth, init_tree(my_rank, node->kids[i], id));
   }
   if (node->nkids) {
-    node->rank = node->kids[0]->rank;
+    if (node->rank < 0) node->rank = node->kids[0]->rank;
     node->cellidx = id++;
   } else {
     cedr_throw_if(node->rank == my_rank && (node->cellidx < 0 || node->cellidx >= id),
