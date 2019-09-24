@@ -1042,9 +1042,9 @@ private:
     for (const auto& t : tracers_)
       qlt_.declare_tracer(t.problem_type, 0);
     qlt_.end_tracer_declarations();
-    size_t l2r_sz, r2l_sz;
-    qlt_.get_buffers_sizes(l2r_sz, r2l_sz);
     if (external_memory_) {
+      size_t l2r_sz, r2l_sz;
+      qlt_.get_buffers_sizes(l2r_sz, r2l_sz);
       buf1_ = typename QLTT::RealList("buf1", l2r_sz);
       buf2_ = typename QLTT::RealList("buf2", r2l_sz);
       qlt_.set_buffers(buf1_.data(), buf2_.data());

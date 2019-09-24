@@ -71,23 +71,43 @@ void CAAS<ES>::end_tracer_declarations () {
 }
 
 template <typename ES>
+void CAAS<ES>::get_buffers_sizes (size_t& buf1, size_t& buf2, size_t& buf3) {
+  const Int e = need_conserve_ ? 1 : 0;
+  const auto nslots = 4*probs_.size();
+  buf1 = nlclcells_ * ((3+e)*probs_.size() + 1);
+  buf2 = nslots*(user_reducer_ ? nlclcells_ : 1);
+  buf3 = nslots;
+}
+
+template <typename ES>
 void CAAS<ES>::get_buffers_sizes (size_t& buf1, size_t& buf2) {
+  size_t buf3;
+  get_buffers_sizes(buf1, buf2, buf3);
+  buf2 += buf3;
 }
 
 template <typename ES>
 void CAAS<ES>::set_buffers (Real* buf1, Real* buf2) {
+  size_t buf1sz, buf2sz, buf3sz;
+  get_buffers_sizes(buf1sz, buf2sz, buf3sz);
+  d_ = RealList(buf1, buf1sz);
+  send_ = RealList(buf2, buf2sz);
+  recv_ = RealList(buf2 + buf2sz, buf3sz);
 }
 
 template <typename ES>
 void CAAS<ES>::finish_setup () {
-  cedr_assert( ! finished_setup_);
+  if (recv_.size() > 0) {
+    finished_setup_ = true;
+    return;
+  }
+  size_t buf1, buf2, buf3;
+  get_buffers_sizes(buf1, buf2, buf3);
   // (rho, Qm, Qm_min, Qm_max, [Qm_prev])
-  const Int e = need_conserve_ ? 1 : 0;
-  d_ = RealList("CAAS data", nlclcells_ * ((3+e)*probs_.size() + 1));
-  const auto nslots = 4*probs_.size();
+  d_ = RealList("CAAS data", buf1);
   // (e'Qm_clip, e'Qm, e'Qm_min, e'Qm_max, [e'Qm_prev])
-  send_ = RealList("CAAS send", nslots*(user_reducer_ ? nlclcells_ : 1));
-  recv_ = RealList("CAAS recv", nslots);
+  send_ = RealList("CAAS send", buf2);
+  recv_ = RealList("CAAS recv", buf3);
   finished_setup_ = true;
 }
 
@@ -309,6 +329,13 @@ struct TestCAAS : public cedr::test::TestRandomized {
     }
     tracers_ = tracers;
     caas_->end_tracer_declarations();
+    if (external_memory_) {
+      size_t l2r_sz, r2l_sz;
+      caas_->get_buffers_sizes(l2r_sz, r2l_sz);
+      buf1_ = typename CAAST::RealList("buf1", l2r_sz);
+      buf2_ = typename CAAST::RealList("buf2", r2l_sz);
+      caas_->set_buffers(buf1_.data(), buf2_.data());
+    }
     caas_->finish_setup();
   }
 
@@ -321,6 +348,7 @@ private:
   bool external_memory_;
   Int nlclcells_;
   CAAST::Ptr caas_;
+  typename CAAST::RealList buf1_, buf2_;
 
   static Int get_nllclcells (const Int& ncells, const Int& np, const Int& rank) {
     Int nlclcells = ncells / np;
