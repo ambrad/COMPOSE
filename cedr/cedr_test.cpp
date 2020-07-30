@@ -3,6 +3,7 @@
 
 #include "cedr_qlt.hpp"
 #include "cedr_caas.hpp"
+#include "cedr_bfb_tree_allreduce.hpp"
 #include "cedr_mpi.hpp"
 #include "cedr_util.hpp"
 #include "cedr_test.hpp"
@@ -91,6 +92,7 @@ int main (int argc, char** argv) {
     if (inp.qin.unittest) {
       nerr += cedr::local::unittest();
       nerr += cedr::caas::test::unittest(p);
+      nerr += cedr::BfbTreeAllReducer<>::unittest(p);
     }
     if (inp.qin.unittest || inp.qin.perftest)
       nerr += cedr::qlt::test::run_unit_and_randomized_tests(p, inp.qin);
