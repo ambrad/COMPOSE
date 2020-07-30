@@ -24,18 +24,21 @@ struct BfbTreeAllReducer {
                     // A leaf is a leaf node in the reduction tree. The global
                     // tree has nleaf leaves. Each leaf has nfield scalars to
                     // reduce.
-                    const Int nleaf,
-                    // nlocal is number of values to reduce in this rank.  nfld
-                    // is number of fields.
-                    const Int nlocal, const Int nfield);
+                    const Int nleaf, const Int nfield);
 
+  // All three are optional.
   void get_host_buffers_sizes(size_t& buf1, size_t& buf2);
   void set_host_buffers(Real* buf1, Real* buf2);
-
+  // If you don't call this, it will be called on the first allreduce. So call
+  // this if you're doing timing runs before the time stepping loop.
   void finish_setup();
 
-  // In Fortran, these are formatted as send(nlocal, nfield), recv(nfield).
-  void allreduce(const ConstRealList& send, const RealList& recv);
+  // In Fortran, these are formatted as recv(nfield) and -- with fastest index
+  // last -- send(nfield, nlocal) if transpose or send(nlocal, nfield)
+  // otherwise, where nlocal is the number of leaf nodes on this rank. send and
+  // recv can point to the same memory.
+  void allreduce(const ConstRealList& send, const RealList& recv,
+                 const bool transpose = false);
 
   static Int unittest(const mpi::Parallel::Ptr& p);
 
@@ -46,8 +49,9 @@ private:
   RealListHost bd_;
 
   void init(const mpi::Parallel::Ptr& p, const tree::Node::Ptr& tree,
-            const Int nleaf, const Int nlocal, const Int nfield);
+            const Int nleaf, const Int nfield);
   const Real* get_send_host(const ConstRealList& send);
+  void fill_recv(const RealList& recv);
 };
 
 } // namespace cedr
