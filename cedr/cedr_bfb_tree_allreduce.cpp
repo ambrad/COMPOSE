@@ -79,7 +79,6 @@ void BfbTreeAllReducer<ES>
   const auto& ns = *ns_;
   const auto nf = nfield_;
   cedr_assert(ns.levels[0].nodes.size() == static_cast<size_t>(nlocal_));
-  cedr_assert( ! transpose); // for now
 
   if ( ! bd_.size()) finish_setup();
   const auto buf_host = get_send_host(send);
@@ -88,7 +87,10 @@ void BfbTreeAllReducer<ES>
   for (Int id = 0; id < nlocal_; ++id) {
     const auto& idx = ns.levels[0].nodes[id];
     const auto n = ns.node_h(idx);
-    if ( ! transpose) {
+    if (transpose) {
+      auto d = &bd_[n->offset * nf];
+      for (Int j = 0; j < nf; ++j) d[j] = buf_host[nlocal_*j + id];
+    } else {
       const auto s = buf_host + id*nf;
       auto d = &bd_[n->offset * nf];
       for (Int j = 0; j < nf; ++j) d[j] = s[j];
@@ -162,40 +164,53 @@ Int BfbTreeAllReducer<ES>::unittest (const Parallel::Ptr& p) {
   Int nerr = 0;
   for (size_t is = 0; is < sizeof(szs)/sizeof(*szs); ++is)
     for (size_t id = 0; id < sizeof(dists)/sizeof(*dists); ++id)
-      for (bool imbalanced: {false, true}) {
-        const Int ncell = szs[is];
-        Mesh m(ncell, p, dists[id]);
-        tree::Node::Ptr tree = make_tree(m, imbalanced);
+      for (bool imbalanced : {false, true})
+        for (bool transpose : {false, true}) {
+          const Int ncell = szs[is];
+          Mesh m(ncell, p, dists[id]);
+          tree::Node::Ptr tree = make_tree(m, imbalanced);
 
-        Int nlocal = 0;
-        for (Int i = 0; i < ncell; ++i) if (myrank == m.rank(i)) ++nlocal;
+          Int nlocal = 0;
+          for (Int i = 0; i < ncell; ++i) if (myrank == m.rank(i)) ++nlocal;
 
-        BfbTreeAllReducer<>::RealList send("send", nlocal*nfield), recv("recv", nfield);
-        std::vector<Real> mpi_recv(nfield);
-        const auto send_m = Kokkos::create_mirror_view(send);
-        const auto recv_m = Kokkos::create_mirror_view(recv);
-        for (Int i = 0; i < nlocal; ++i)
+          BfbTreeAllReducer<>::RealList send("send", nlocal*nfield), recv("recv", nfield);
+          std::vector<Real> mpi_recv(nfield);
+          const auto send_m = Kokkos::create_mirror_view(send);
+          const auto recv_m = Kokkos::create_mirror_view(recv);
+          if (transpose)
+            for (Int j = 0; j < nfield; ++j)
+              for (Int i = 0; i < nlocal; ++i)
+                send_m(nlocal*j + i) = util::urand();
+          else
+            for (Int i = 0; i < nlocal; ++i)
+              for (Int j = 0; j < nfield; ++j)
+                send_m(nfield*i + j) = util::urand();
+          Kokkos::deep_copy(send, send_m);
+
+          BfbTreeAllReducer<> ar(p, tree, m.ncell(), nfield);
+          ar.allreduce(send, recv, transpose);
+          Kokkos::deep_copy(recv_m, recv);
+
+          std::vector<Real> lcl_red(nfield, 0);
+          if (transpose) {
+            for (Int j = 0; j < nfield; ++j)
+              for (Int i = 0; i < nlocal; ++i)
+                lcl_red[j] += send_m[nlocal*j + i];
+          } else {
+            for (Int i = 0; i < nlocal; ++i)
+              for (Int j = 0; j < nfield; ++j)
+                lcl_red[j] += send_m[nfield*i + j];
+          }
+          mpi::all_reduce(*p, lcl_red.data(), mpi_recv.data(), nfield, MPI_SUM);
+
+          Real max_re = 0;
           for (Int j = 0; j < nfield; ++j)
-            send_m(nfield*i + j) = util::urand();
-        Kokkos::deep_copy(send, send_m);
-
-        BfbTreeAllReducer<> ar(p, tree, m.ncell(), nfield);
-        ar.allreduce(send, recv);
-        Kokkos::deep_copy(recv_m, recv);
-
-        for (Int i = 1; i < nlocal; ++i)
-          for (Int j = 0; j < nfield; ++j)
-            send_m[j] += send_m[nfield*i + j];
-        mpi::all_reduce(*p, send_m.data(), mpi_recv.data(), nfield, MPI_SUM);
-
-        Real max_re = 0;
-        for (Int j = 0; j < nfield; ++j)
-          max_re = std::max(max_re, util::reldif(mpi_recv[j], recv_m(j)));
-        if (max_re > 2*std::log(ncell)*std::numeric_limits<Real>::epsilon()) {
-          printf("FAIL BfbTreeAllReducer<>::unittest max_re %1.3e\n", max_re);
-          ++nerr;
+            max_re = std::max(max_re, util::reldif(mpi_recv[j], recv_m(j)));
+          if (max_re > 2*std::log(ncell)*std::numeric_limits<Real>::epsilon()) {
+            printf("FAIL BfbTreeAllReducer<>::unittest max_re %1.3e\n", max_re);
+            ++nerr;
+          }
         }
-      }
   return nerr;
 }
 
