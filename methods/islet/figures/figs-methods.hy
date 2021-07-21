@@ -489,7 +489,7 @@
 (when-inp ["plot-slmmir-vs-heuristic"]
   (sv fnames (, "slmmir-on-basis-lines-2.txt")
       c (futils.get-context)
-      lebesgue True
+      lebesgue False
       d {})
   (for [fname fnames]
     (sv d (parse-slmmir-output (+ "data/" fname) :d d :lebesgue lebesgue)))
