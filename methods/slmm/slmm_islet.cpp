@@ -254,13 +254,13 @@ bool UniformOffsetNodal
   case  4: return evalon< 4,2>(xnode, {3,4        }, {0,0        }, x, v);
   case  5: return evalon< 5,2>(xnode, {3,4        }, {0,0        }, x, v);
   case  6: return evalon< 6,3>(xnode, {3,4,6      }, {0,0,0      }, x, v);
-  case  7: return evalon< 7,3>(xnode, {3,4,6      }, {0,0,0      }, x, v);
+  case  7: return evalon< 7,3>(xnode, {3,4,4      }, {0,0,1      }, x, v);
   case  8: return evalon< 8,4>(xnode, {4,4,4,4    }, {0,0,1,2    }, x, v);
   case  9: return evalon< 9,4>(xnode, {4,4,4,4    }, {0,0,1,2    }, x, v);
-  case 10: return evalon<10,5>(xnode, {4,5,4,4,4  }, {0,0,1,2,3  }, x, v);
-  case 11: return evalon<11,5>(xnode, {4,5,4,4,4  }, {0,0,1,2,3  }, x, v);
-  case 12: return evalon<12,6>(xnode, {4,5,5,4,4,4}, {0,0,1,2,3,4}, x, v);
-  case 13: return evalon<13,6>(xnode, {4,5,6,4,4,4}, {0,0,0,2,3,4}, x, v);
+  case 10: return evalon<10,5>(xnode, {4,4,4,4,4  }, {0,0,1,2,3  }, x, v);
+  case 11: return evalon<11,5>(xnode, {4,4,4,4,4  }, {0,0,1,2,3  }, x, v);
+  case 12: return evalon<12,6>(xnode, {4,4,4,4,4,4}, {0,0,1,2,3,4}, x, v);
+  case 13: return evalon<13,6>(xnode, {4,4,4,4,4,4}, {0,0,1,2,3,4}, x, v);
   }
   return false;
 }
