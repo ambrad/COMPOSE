@@ -16,3 +16,8 @@ provided by Anaconda 3.
 
 Programs need BLAS, LAPACK, and Kokkos. NetCDF is optional and was not used in
 for the results in this paper. We used Kokkos version 3.1 in our build.
+
+The code used to obtain performance data on Summit will be part of main E3SM
+soon. The exact version used to generate the data is archived here:
+    https://github.com/ambrad/E3SM/releases/tag/islet-2d-paper-summit-sl-gpu-timings
+
