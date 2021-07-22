@@ -5,7 +5,7 @@ exe=../../slmm/slmmir
 ctr=0
 function run {
     ctr=$(expr $ctr + 1)
-    cmd="OMP_NUM_THREADS=48 KMP_AFFINITY=balanced ../$exe -method pcsl $ics -ic gaussianhills -we 0 -rit -dmc eh -T 12 -d2c -ode $ode -ne $ne -np $np -nsteps $nstep -prefine $prefine -mono $cdrglb -lim $cdrlcl -timeint $timeint -footprint"
+    cmd="OMP_NUM_THREADS=48 KMP_AFFINITY=balanced $exe -method pcsl $ics -ic gaussianhills -we 0 -rit -dmc eh -T 12 -d2c -ode $ode -ne $ne -np $np -nsteps $nstep -prefine $prefine -mono $cdrglb -lim $cdrlcl -timeint $timeint -footprint"
     grepcmd='grep "^C \|^L \|^M \|footprint>"'
     echo "cmd> $ctr $cmd"
     eval "$cmd | $grepcmd"

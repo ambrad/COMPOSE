@@ -5,7 +5,7 @@ exe=../../slmm/slmmir
 ctr=0
 function run {
     ctr=$(expr $ctr + 1)
-    cmd="OMP_NUM_THREADS=48 KMP_AFFINITY=balanced ../$exe -method $method -ic gaussianhills -ic cosinebells -ic correlatedcosinebells -ic slottedcylinders -we 0 -rit -dmc eh -T $(expr 12 \* $ncycle) -d2c -ode $ode -ne $ne -np $np -nsteps $nstep -prefine $prefine -mono $cdrglb -lim $cdrlcl -timeint $timeint"
+    cmd="OMP_NUM_THREADS=48 KMP_AFFINITY=balanced $exe -method $method -ic gaussianhills -ic cosinebells -ic correlatedcosinebells -ic slottedcylinders -we 0 -rit -dmc eh -T $(expr 12 \* $ncycle) -d2c -ode $ode -ne $ne -np $np -nsteps $nstep -prefine $prefine -mono $cdrglb -lim $cdrlcl -timeint $timeint"
     grepcmd='grep "^C \|^L \|^M "'
     echo "cmd> $ctr $cmd"
     eval "$cmd | $grepcmd"

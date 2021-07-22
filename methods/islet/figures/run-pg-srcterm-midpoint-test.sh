@@ -8,7 +8,7 @@ function run {
     ics1="-ic gaussianhills -ic cosinebells -ic slottedcylinders"
     ics2="-ic zero -ic zero -ic zero"
     for pg in 2 $(expr $np - 2) $np; do
-        cmd="OMP_NUM_THREADS=48 KMP_AFFINITY=balanced ../$exe -method pcsl $ics1 -ic toychem1 -ic toychem2 $ics2 -we 0 -rit -dmc eh -T 12 -d2c -ode $ode -ne $ne -np $np -pg $pg -nsteps $nstep -prefine $prefine -mono $cdrglb -lim $cdrlcl -timeint $timeint -midpoint-check"
+        cmd="OMP_NUM_THREADS=48 KMP_AFFINITY=balanced $exe -method pcsl $ics1 -ic toychem1 -ic toychem2 $ics2 -we 0 -rit -dmc eh -T 12 -d2c -ode $ode -ne $ne -np $np -pg $pg -nsteps $nstep -prefine $prefine -mono $cdrglb -lim $cdrlcl -timeint $timeint -midpoint-check"
         grepcmd='grep "^C \|^L \|^M "'
         echo "cmd> $ctr $cmd"
         eval "$cmd | $grepcmd"

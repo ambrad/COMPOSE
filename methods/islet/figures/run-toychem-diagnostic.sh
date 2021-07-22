@@ -6,7 +6,7 @@ ctr=0
 function run {
     ctr=$(expr $ctr + 1)
     for pg in $(expr $np - 2) $np; do
-        cmd="OMP_NUM_THREADS=48 KMP_AFFINITY=balanced ../$exe -method pcsl $ics -ic gaussianhills -ic toychem1 -ic toychem2 -we 0 -rit -dmc eh -T $(expr 12 \* $ncycle) -d2c -ode $ode -ne $ne -np $np -pg $pg -nsteps $nstep -prefine $prefine -mono $cdrglb -lim $cdrlcl -timeint $timeint"
+        cmd="OMP_NUM_THREADS=48 KMP_AFFINITY=balanced $exe -method pcsl $ics -ic gaussianhills -ic toychem1 -ic toychem2 -we 0 -rit -dmc eh -T $(expr 12 \* $ncycle) -d2c -ode $ode -ne $ne -np $np -pg $pg -nsteps $nstep -prefine $prefine -mono $cdrglb -lim $cdrlcl -timeint $timeint"
         grepcmd='grep "^C \|^L \|^M \|toy "'
         echo "cmd> $ctr $cmd"
         eval "$cmd | $grepcmd"
