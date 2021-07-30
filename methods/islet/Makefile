@@ -31,6 +31,5 @@ cslunstab: cslunstab.o
 clean:
 	rm -f *.o *.so search np4 pum_sweep pum_perturb_plot run_meam1_sweep
 
-search: search.cpp
-cslunstab: cslunstab.cpp
-maxeigcomp.o: maxeigcomp.hpp npx.hpp interpmethod.hpp
+# generate by running `bash make.depends`
+include make.depends

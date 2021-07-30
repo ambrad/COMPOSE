@@ -1,0 +1,29 @@
+cslunstab.o: cslunstab.cpp
+isl.o: isl.cpp tables.hpp types.hpp slmm_stuff.hpp util.hpp isl.hpp \
+ interpmethod.hpp searchxnodes.hpp nodalbasis.hpp npx.hpp
+maxeigcomp.o: maxeigcomp.cpp maxeigcomp.hpp types.hpp slmm_stuff.hpp \
+ interpmethod.hpp npx.hpp tables.hpp util.hpp
+nodalbasis.o: nodalbasis.cpp nodalbasis.hpp types.hpp slmm_stuff.hpp \
+ npx.hpp tables.hpp interpmethod.hpp util.hpp
+np4.o: np4.cpp np4.hpp types.hpp slmm_stuff.hpp isl.hpp interpmethod.hpp
+npx.o: npx.cpp npx.hpp types.hpp slmm_stuff.hpp tables.hpp \
+ interpmethod.hpp
+pum.o: pum.cpp pum.hpp types.hpp slmm_stuff.hpp maxeigcomp.hpp \
+ interpmethod.hpp npx.hpp tables.hpp util.hpp isl.hpp
+pum_sweep.o: pum_sweep.cpp isl.hpp types.hpp slmm_stuff.hpp \
+ interpmethod.hpp pum.hpp maxeigcomp.hpp npx.hpp tables.hpp
+run_meam1_sweep.o: run_meam1_sweep.cpp isl.hpp types.hpp slmm_stuff.hpp \
+ interpmethod.hpp maxeigcomp.hpp npx.hpp tables.hpp pum.hpp
+run_np4.o: run_np4.cpp np4.hpp types.hpp slmm_stuff.hpp isl.hpp \
+ interpmethod.hpp util.hpp npx.hpp tables.hpp searchxnodes.hpp \
+ nodalbasis.hpp maxeigcomp.hpp pum.hpp
+search.o: search.cpp slmm_stuff.hpp tables.hpp types.hpp npx.hpp \
+ interpmethod.hpp maxeigcomp.hpp searchxnodes.hpp nodalbasis.hpp pum.hpp \
+ util.hpp
+searchxnodes.o: searchxnodes.cpp searchxnodes.hpp types.hpp \
+ slmm_stuff.hpp nodalbasis.hpp tables.hpp npx.hpp interpmethod.hpp \
+ maxeigcomp.hpp pum.hpp isl.hpp util.hpp
+studymetrics.o: studymetrics.cpp pum.hpp types.hpp slmm_stuff.hpp \
+ maxeigcomp.hpp interpmethod.hpp npx.hpp tables.hpp searchxnodes.hpp \
+ nodalbasis.hpp
+tables.o: tables.cpp types.hpp slmm_stuff.hpp util.hpp tables.hpp
