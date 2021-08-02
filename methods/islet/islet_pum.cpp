@@ -1,9 +1,9 @@
-#include "pum.hpp"
+#include "islet_pum.hpp"
 
 #include <omp.h>
 
-#include "util.hpp"
-#include "isl.hpp"
+#include "islet_util.hpp"
+#include "islet_isl.hpp"
 
 namespace pum {
 

@@ -1,7 +1,7 @@
 #include <cstdlib>
 
-#include "isl.hpp"
-#include "pum.hpp"
+#include "islet_isl.hpp"
+#include "islet_pum.hpp"
 
 // Illustrate why a 1-element hop is the key thing to study. Report meam1 at x
 // in [-1,1] if meam1 >= tol. x, meam1 are 1-1.

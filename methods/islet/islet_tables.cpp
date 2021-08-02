@@ -1,6 +1,6 @@
-#include "types.hpp"
-#include "util.hpp"
-#include "tables.hpp"
+#include "islet_types.hpp"
+#include "islet_util.hpp"
+#include "islet_tables.hpp"
 
 namespace islet {
 

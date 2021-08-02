@@ -1,7 +1,7 @@
-#ifndef INCLUDE_NODALBASIS_HPP
-#define INCLUDE_NODALBASIS_HPP
+#ifndef INCLUDE_ISLET_NODALBASIS_HPP
+#define INCLUDE_ISLET_NODALBASIS_HPP
 
-#include "types.hpp"
+#include "islet_types.hpp"
 
 class Nodes {
   Int np, nh;

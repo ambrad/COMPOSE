@@ -1,7 +1,7 @@
 #ifndef INCLUDE_ISLET_TABLES_HPP
 #define INCLUDE_ISLET_TABLES_HPP
 
-#include "types.hpp"
+#include "islet_types.hpp"
 
 namespace islet {
 static const Int np_max = 16;

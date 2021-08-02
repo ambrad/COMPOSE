@@ -1,5 +1,5 @@
-#include "np4.hpp"
-#include "isl.hpp"
+#include "islet_np4.hpp"
+#include "islet_isl.hpp"
 
 static const Real oosqrt5 = 0.44721359549995793928;
 

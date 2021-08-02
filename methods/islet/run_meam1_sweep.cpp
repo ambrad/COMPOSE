@@ -1,6 +1,6 @@
-#include "isl.hpp"
-#include "maxeigcomp.hpp"
-#include "pum.hpp"
+#include "islet_isl.hpp"
+#include "islet_maxeigcomp.hpp"
+#include "islet_pum.hpp"
 
 #include <cstdio>
 

@@ -1,9 +1,9 @@
-#ifndef INCLUDE_MAXEIGCOMP_HPP
-#define INCLUDE_MAXEIGCOMP_HPP
+#ifndef INCLUDE_ISLET_MAXEIGCOMP_HPP
+#define INCLUDE_ISLET_MAXEIGCOMP_HPP
 
-#include "types.hpp"
+#include "islet_types.hpp"
 #include "slmm_stuff.hpp"
-#include "interpmethod.hpp"
+#include "islet_interpmethod.hpp"
 #include "npx.hpp"
 
 #include <memory>

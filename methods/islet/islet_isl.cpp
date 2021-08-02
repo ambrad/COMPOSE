@@ -4,9 +4,9 @@
 #include <vector>
 #include <limits>
 
-#include "tables.hpp"
-#include "util.hpp"
-#include "isl.hpp"
+#include "islet_tables.hpp"
+#include "islet_util.hpp"
+#include "islet_isl.hpp"
 #include "searchxnodes.hpp"
 #include "npx.hpp"
 

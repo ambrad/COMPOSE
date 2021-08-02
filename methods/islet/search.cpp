@@ -3,12 +3,12 @@
 #endif
 
 #include "slmm_stuff.hpp"
-#include "tables.hpp"
+#include "islet_tables.hpp"
 #include "npx.hpp"
-#include "maxeigcomp.hpp"
+#include "islet_maxeigcomp.hpp"
 #include "searchxnodes.hpp"
-#include "pum.hpp"
-#include "util.hpp"
+#include "islet_pum.hpp"
+#include "islet_util.hpp"
 
 #include <omp.h>
 #include <array>

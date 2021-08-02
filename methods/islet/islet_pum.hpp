@@ -1,10 +1,10 @@
-#ifndef INCLUDE_PUM_HPP
-#define INCLUDE_PUM_HPP
+#ifndef INCLUDE_ISLET_PUM_HPP
+#define INCLUDE_ISLET_PUM_HPP
 
 #include <map>
 
-#include "types.hpp"
-#include "maxeigcomp.hpp"
+#include "islet_types.hpp"
+#include "islet_maxeigcomp.hpp"
 
 namespace pum {
 

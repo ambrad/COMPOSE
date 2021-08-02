@@ -1,10 +1,10 @@
 #include "searchxnodes.hpp"
-#include "tables.hpp"
+#include "islet_tables.hpp"
 #include "npx.hpp"
-#include "maxeigcomp.hpp"
-#include "pum.hpp"
-#include "isl.hpp"
-#include "util.hpp"
+#include "islet_maxeigcomp.hpp"
+#include "islet_pum.hpp"
+#include "islet_isl.hpp"
+#include "islet_util.hpp"
 
 static Real factorial (const Int n) {
   Real f = 1;

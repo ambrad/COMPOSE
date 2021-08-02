@@ -1,8 +1,8 @@
-#ifndef INCLUDE_SEARCHXNODES_HPP
-#define INCLUDE_SEARCHXNODES_HPP
+#ifndef INCLUDE_ISLET_SEARCHXNODES_HPP
+#define INCLUDE_ISLET_SEARCHXNODES_HPP
 
-#include "types.hpp"
-#include "nodalbasis.hpp"
+#include "islet_types.hpp"
+#include "islet_nodalbasis.hpp"
 
 #include <vector>
 #include <sstream>

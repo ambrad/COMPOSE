@@ -1,5 +1,5 @@
-#ifndef INCLUDE_SLMM_STUFF_HPP
-#define INCLUDE_SLMM_STUFF_HPP
+#ifndef INCLUDE_ISLET_SLMM_STUFF_HPP
+#define INCLUDE_ISLET_SLMM_STUFF_HPP
 
 #include <cassert>
 #include <cmath>

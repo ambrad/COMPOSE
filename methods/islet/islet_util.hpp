@@ -5,7 +5,7 @@
 #include <iostream>
 #include <fstream>
 
-#include "types.hpp"
+#include "islet_types.hpp"
 
 namespace islet {
 #define throw_if(condition, message) do {                               \

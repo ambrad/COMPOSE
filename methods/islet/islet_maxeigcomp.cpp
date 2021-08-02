@@ -1,9 +1,9 @@
 #include <omp.h>
 
-#include "maxeigcomp.hpp"
-#include "tables.hpp"
+#include "islet_maxeigcomp.hpp"
+#include "islet_tables.hpp"
 #include "npx.hpp"
-#include "util.hpp"
+#include "islet_util.hpp"
 
 using slmm::Int;
 using slmm::Real;

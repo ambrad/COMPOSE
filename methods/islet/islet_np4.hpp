@@ -1,9 +1,9 @@
-#ifndef INCLUDE_NP4_HPP
-#define INCLUDE_NP4_HPP
+#ifndef INCLUDE_ISLET_NP4_HPP
+#define INCLUDE_ISLET_NP4_HPP
 
-#include "types.hpp"
-#include "isl.hpp"
-#include "interpmethod.hpp"
+#include "islet_types.hpp"
+#include "islet_isl.hpp"
+#include "islet_interpmethod.hpp"
 
 struct Np4InterpMethod : public UserInterpMethod {
   typedef std::shared_ptr<Np4InterpMethod> Ptr;

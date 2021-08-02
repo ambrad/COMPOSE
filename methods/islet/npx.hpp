@@ -1,9 +1,9 @@
-#ifndef INCLUDE_NPX_HPP
-#define INCLUDE_NPX_HPP
+#ifndef INCLUDE_ISLET_NPX_HPP
+#define INCLUDE_ISLET_NPX_HPP
 
-#include "types.hpp"
-#include "tables.hpp"
-#include "interpmethod.hpp"
+#include "islet_types.hpp"
+#include "islet_tables.hpp"
+#include "islet_interpmethod.hpp"
 
 template <typename Scalar>
 void eval_lagrange_poly (const Scalar* x_gll, const Int& np, const Scalar& x,

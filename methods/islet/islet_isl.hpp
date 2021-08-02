@@ -1,8 +1,8 @@
 #ifndef INCLUDE_ISLET_ISL_HPP
 #define INCLUDE_ISLET_ISL_HPP
 
-#include "types.hpp"
-#include "interpmethod.hpp"
+#include "islet_types.hpp"
+#include "islet_interpmethod.hpp"
 
 #include <memory>
 

@@ -1,10 +1,10 @@
-#include "np4.hpp"
+#include "islet_np4.hpp"
 
-#include "util.hpp"
+#include "islet_util.hpp"
 #include "npx.hpp"
 #include "searchxnodes.hpp"
-#include "maxeigcomp.hpp"
-#include "pum.hpp"
+#include "islet_maxeigcomp.hpp"
+#include "islet_pum.hpp"
 
 static const Real oosqrt5 = 0.44721359549995793928;
 
