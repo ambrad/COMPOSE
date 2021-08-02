@@ -50,50 +50,6 @@ struct npxstab : public npx<Scalar> {
       eval_lagrange_poly(x_gll, np, x, v);
   }
 
-  static void outer_eval (const Real& x, Real v[4]) {
-    static const Real
-      sqrt5 = std::sqrt(5.0),
-      oosqrt5 = 1.0 / sqrt5,
-      xbar = (2*oosqrt5) / (1 + oosqrt5),
-      ooxbar = 1 / xbar,
-      ybar = 1 / (xbar - 1);
-    const Real xn = (x + oosqrt5) / (1 + oosqrt5);
-    v[0] = 0;
-    v[1] = 1 + ybar*xn*((1 - ooxbar)*xn + ooxbar - xbar);
-    v[2] = ybar*ooxbar*xn*(xn - 1);
-    v[3] = ybar*xn*(xbar - xn);
-  }
-
-  static void np4_subgrid_eval (const Real& x, Real y[4]) {
-    static const Real
-      sqrt5 = std::sqrt(5.0),
-      oosqrt5 = 1.0 / sqrt5,
-      alpha = 0.5527864045000416708 + 1e-4, // for a tiny bit of extra stability
-      v = 0.427*(1 + alpha),
-      x2 = 0.4472135954999579277, // 1/sqrt(5) if the compiler can't handle oosqrt5
-      x3 = 1 - x2,
-      det = x2*x3*(x2 - x3),
-      y2 = alpha,
-      y3 = v,
-      c1 = (x3*y2 - x2*y3)/det,
-      c2 = (-x3*x3*y2 + x2*x2*y3)/det;
-    if (x < -oosqrt5 || x > oosqrt5) {
-      if (x < -oosqrt5) {
-        outer_eval(-x, y);
-        std::swap(y[0], y[3]);
-        std::swap(y[1], y[2]);
-      } else
-        outer_eval(x, y);
-      Real y4[4];
-      eval<4,0>({}, {}, x, y4);
-      const Real x0 = 1 - std::abs(x);
-      const Real a = (c1*x0 + c2)*x0;
-      for (int i = 0; i < 4; ++i)
-        y[i] = a*y[i] + (1 - a)*y4[i];
-    } else
-      eval<4,0>({}, {}, x, y);
-  }
-
   static void eval(const Int& np, const Scalar& x, Scalar* const v);
 
   static int ooa_vs_np (const int np) {

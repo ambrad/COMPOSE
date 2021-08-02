@@ -22,34 +22,11 @@ static Real eval_lagrange_poly (const Int& n, const Real* xsup, const Real* ysup
   return y;
 }
 
-struct Options {
-  Int ne_max;
-  Real meam1_tol, pum_tol;
-
-  Options ()
-    : ne_max(1001), meam1_tol(1e-14), pum_tol(1e-7)
-  {}
-};
-
-// Convex combination parameter for np=3 and np=4 combination that gives exactly
-// 1 for the interpolant at gll_x[2] - 1 for the antisymmetric function with GLL
-// point values (0, 1, -1, 0).
-static Real calc_alpha () {
-  const auto x_gll = islet::get_x_gll(4);
-  const Real x0 = x_gll[1] + 1;
-  Real y[4];
-  npxstab<>::outer_eval(x0, y);
-  const Real y3sum = y[2] - y[1];
-  eval_lagrange_poly(x_gll, 4, x0, y);
-  const Real y4sum = y[2] - y[1];
-  return (1 - y4sum) / (y3sum - y4sum);
-}
-
-// original method impl using alpha from calc_alpha
 static Real normalize_x (const Real* gll_x, const Real& x) {
   const Real x0 = gll_x[1];
   return (x - x0) / (1 - x0);
 }
+
 static void outer_eval (const Real* gll_x, const Real& x, Real v[4]) {
   const Real
     xbar = normalize_x(gll_x, gll_x[2]),
@@ -61,52 +38,29 @@ static void outer_eval (const Real* gll_x, const Real& x, Real v[4]) {
   v[2] = ybar*ooxbar*xn*(xn - 1);
   v[3] = ybar*xn*(xbar - xn);
 }
-static void eval_np4 (const Real* const x_gll, const Real& x, Real y[4]) {
-  static constexpr Real
-    alpha = 0.5527864045000416708,
-    v = 0.427*(1 + alpha),
-    x2 = 0.4472135954999579277, // 1/sqrt(5)
-    x3 = 1 - x2,
-    det = x2*x3*(x2 - x3),
-    y2 = alpha,
-    y3 = v,
-    c1 = (x3*y2 - x2*y3)/det,
-    c2 = (-x3*x3*y2 + x2*x2*y3)/det;
-  if (x < x_gll[1] || x > x_gll[2]) {
-    Real y4[4];
-    eval_lagrange_poly(x_gll, 4, x, y4);
-    if (x < x_gll[1]) {
-      outer_eval(x_gll, -x, y);
-      std::swap(y[0], y[3]);
-      std::swap(y[1], y[2]);
-    } else
-      outer_eval(x_gll, x, y);
-    const Real x0 = 1 - std::abs(x);
-    const Real a = (c1*x0 + c2)*x0;
-    for (int i = 0; i < 4; ++i)
-      y[i] = a*y[i] + (1 - a)*y4[i];
-  }
-  else
-    eval_lagrange_poly(x_gll, 4, x, y);
+
+// Convex combination parameter for np=3 and np=4 combination that gives exactly
+// 1 for the interpolant at gll_x[2] - 1 for the antisymmetric function with GLL
+// point values (0, 1, -1, 0).
+static Real calc_alpha () {
+  const auto x_gll = islet::get_x_gll(4);
+  const Real x0 = x_gll[1] + 1;
+  Real y[4];
+  outer_eval(x_gll, x0, y);
+  const Real y3sum = y[2] - y[1];
+  eval_lagrange_poly(x_gll, 4, x0, y);
+  const Real y4sum = y[2] - y[1];
+  return (1 - y4sum) / (y3sum - y4sum);
 }
 
-// For c = (0, c1, 1), test that our simpler expression matches eval_a.
-static void test_eval_a () {
-  Real c1 = 0.306;
-  Np4InterpMethod im(0, c1, 1);
-  const Int n = 100;
-  for (Int i = 0; i <= n; ++i) {
-    const Real
-      x = -1 + (1 - oosqrt5)*i/n,
-      x0 = 2*(1 - std::abs(x))/(1 - oosqrt5) - 1,
-      a_simple = (c1 + (0.5 - c1)*x0)*(x0 + 1),
-      a_eval = im.eval_a(x),
-      re = std::abs(a_simple - a_eval); // relative to 1
-    if (re > 1e-15)
-      printf("x %1.3e a_simple %1.3e a_eval %1.3e re %1.1e\n",
-             x, a_simple, a_eval, re);
-  }
-}
+struct Options {
+  Int ne_max;
+  Real meam1_tol, pum_tol;
+
+  Options ()
+    : ne_max(1001), meam1_tol(1e-14), pum_tol(1e-7)
+  {}
+};
 
 static Real run_maxeigcomp (const Np4InterpMethod::Ptr& uim, const Options& o) {
   MaxEigComputer mec;
@@ -248,47 +202,6 @@ static void optimize (Real best_metrics[3], const Options& o,
   }
 }
 
-static void current_np4_to_c (Real c[3], const Real perturb = 0) {
-  const Real
-    sqrt5 = std::sqrt(5.0),
-    oosqrt5 = 1.0 / sqrt5,
-    alpha = 0.5527864045000416708 + perturb,
-    v = 0.427*(1 + alpha),
-    x2 = 0.4472135954999579277, // 1/sqrt(5) if the compiler can't handle oosqrt5
-    x3 = 1 - x2,
-    det = x2*x3*(x2 - x3),
-    y2 = alpha,
-    y3 = v,
-    c1 = (x3*y2 - x2*y3)/det,
-    c2 = (-x3*x3*y2 + x2*x2*y3)/det;
-  Real x0[] = {0, 0.5*(1 - oosqrt5), 1 - oosqrt5};
-  for (Int i = 0; i < 3; ++i)
-    c[i] = (c1*x0[i] + c2)*x0[i];
-}
-
-// Test that our simpler impl matches the original np4 method and impl.
-static void test_original () {
-  Real c[3];
-  current_np4_to_c(c);
-  Np4InterpMethod op(c[0], c[1], c[2]);
-  const auto x_gll = islet::get_x_gll(4);
-  const Int n = 100;
-  Int ne = 0;
-  for (Int i = 0; i <= n; ++i) {
-    const Real x = 2*(Real(i)/n) - 1;
-    Real yop[4], yorig[4];
-    op.eval(x, yop);
-    eval_np4(x_gll, x, yorig);
-    for (Int j = 0; j < 4; ++j) {
-      const Real err = std::abs(yop[j] - yorig[j]);
-      if (err > 10*std::numeric_limits<Real>::epsilon()) {
-        printf("%d %1.3e %1.3e %1.3e %1.1e\n", j, x, yop[j], yorig[j], err);
-        ++ne;
-      };
-    }
-  }
-}
-
 // Test that the metrics specialization above matches the one we use everywhere
 // else when alpha = 0.
 static void test_metrics () {
@@ -305,8 +218,6 @@ static void test_metrics () {
 
 int main (int argc, char** argv) {
   printf("MaxEigComputer::unittest() %d\n", MaxEigComputer::unittest());
-  test_eval_a();
-  test_original();
   test_metrics();
   Real best_metrics[3]; {
     // We have a very good value; use this to make 2- and 3-dimensional the
@@ -329,9 +240,6 @@ int main (int argc, char** argv) {
     o.ne_max = 3333;
     optimize(best_metrics, o, false, false);
   } else {
-    const Real alpha = calc_alpha();
-    printf("calc_alpha: %23.16e\n", alpha);
-
     const auto eval = [&] (const Real c[3]) {
       printf("c %1.16e %1.16e %1.16e\n", c[0], c[1], c[2]);
       const auto uim = std::make_shared<Np4InterpMethod>(c[0], c[1], c[2]);
@@ -345,22 +253,14 @@ int main (int argc, char** argv) {
       run_pum(uim, o);
     };
 
+    // (1, 1, 1)     1.332e-15 pum 1.2516e-08 npm l1 1.5758e-02 l2 1.2782e-02 li 1.5109e-02
+    // (0, 0.306, 1) 1.110e-15 pum 9.9197e-09 npm l1 1.1611e-02 l2 9.0249e-03 li 9.0817e-03
+
     {
       Real c[3];
       c[0] = c[1] = c[2] = 1;
       eval(c);
     }
-
-    for (const Real perturb : {0.0}) {
-      Real c_cur[3];
-      current_np4_to_c(c_cur, perturb);
-      printf("current with perturb %1.2e\n", perturb);
-      eval(c_cur);
-    }
-
-    // (1, 1, 1)     1.332e-15 pum 1.2516e-08 npm l1 1.5758e-02 l2 1.2782e-02 li 1.5109e-02
-    // c_cur         2.021e-14 pum 3.6395e-04 npm l1 1.1687e-02 l2 9.1356e-03 li 9.4606e-03
-    // (0, 0.306, 1) 1.110e-15 pum 9.9197e-09 npm l1 1.1611e-02 l2 9.0249e-03 li 9.0817e-03
 
     {
       const Real c[] = {0,0.306,1};
