@@ -535,20 +535,27 @@ static Int dof (const Int& nx, const Int& ny,
 // domain of the mesh.
 template <typename Function>
 void check_periodicity (const NonUniMesh2d& mesh, const Real& dt, const Function& integrate) {
-  static const Real tol = 1e5*std::numeric_limits<Real>::epsilon();
+  static const Real rtol = 1e2*std::numeric_limits<Real>::epsilon();
+  static const Real atol = std::numeric_limits<Real>::epsilon();
 
   Int nex, ney;
   mesh.ncell(nex, ney);
   const auto& xb = mesh.get_mx().get_xb();
   const auto& yb = mesh.get_my().get_xb();
 
+  const auto check_error = [=] (Real x0, Real tx0, Real x1, Real tx1) {
+    require(reldif(tx0 - x0, tx1 - x1) <= rtol ||
+            std::abs((tx0 - x0) - (tx1 - x1)) <= atol);
+  };
+
   const auto check = [&] (Real x0, Real x1, Real y0, Real y1) {
     Real tx0, ty0, tx1, ty1;
     integrate(x0, y0, dt, tx0, ty0);
     integrate(x1, y1, dt, tx1, ty1);
-    require(reldif(tx0 - x0, tx1 - x1) <= tol);
-    require(reldif(ty0 - y0, ty1 - y1) <= tol);
+    check_error(x0, tx0, x1, tx1);
+    check_error(y0, ty0, y1, ty1);
   };
+
   Int n = 7*std::max(nex, ney);
   for (int i = 0; i <= n; ++i) {
     const Real a = Real(i)/n, x = a*xb[0] + (1-a)*xb[nex];
@@ -626,9 +633,8 @@ static void setup_demo_problem (const std::vector<Real>& xb, const std::vector<R
   // an unstable operator.
   const auto integrate = [&] (const Real& x0, const Real& y0, const Real& dt,
                               Real& xf, Real& yf) {
-    const Real s = Real(nex)/ney;
-    const auto speed = 1 + std::cos(2*M_PI*(0.342 + x0/s - y0));
-    xf = x0 + speed*s*dt;
+    const auto speed = 1 + std::cos(2*M_PI*(0.342 + x0 - y0));
+    xf = x0 + speed*dt;
     yf = y0 + speed*dt;
   };
   NonUniMesh2d mesh(xb.data(), xb.size()-1, yb.data(), yb.size()-1);
@@ -640,9 +646,9 @@ static Real cubic2d_demo_unstable_problem (const bool unstable = true) {
   const Int nex = 15, ney = 13, ne = nex*ney;
   const Real dt = unstable ? 0.2761 : 0.1;
   std::vector<Real> xb(nex+1), yb(ney+1), op(ne*ne), wrk;
-  const Real d = 1.0/ney;
-  for (Int i = 0; i <= nex; ++i) xb[i] = i*d;
-  for (Int i = 0; i <= ney; ++i) yb[i] = i*d;
+  const Real dx = 1.0/nex, dy = 1.0/ney;
+  for (Int i = 0; i <= nex; ++i) xb[i] = i*dx;
+  for (Int i = 0; i <= ney; ++i) yb[i] = i*dy;
   SparseTriple s;
   setup_demo_problem(xb, yb, dt, s, 4, true);
   sparse2dense(s, op);
@@ -678,7 +684,7 @@ static Real calc_l2_reldif (const std::vector<Real>& a, const std::vector<Real>&
 // analytical solution at time T.
 static Real measure_ooa (const Int np, const bool reverse) {
   Int nex = 35, ney = 32, nstep = 22;
-  const Real Lx = Real(nex)/ney, Ly = 1, x0 = -0.4, y0 = 0.2;
+  const Real x0 = -0.4, y0 = 0.2;
   Real dt = 0.012, err[2];
   const Real T = dt*nstep;
   for (Int refine = 0; refine < 2; ++refine) {
@@ -690,11 +696,11 @@ static Real measure_ooa (const Int np, const bool reverse) {
     const Int ne = nex*ney;
     // Make forward and backward ops.
     std::vector<Real> xb(nex+1), yb(ney+1);
-    for (Int i = 0; i <= nex; ++i) xb[i] = x0 + Real(i*Lx)/nex;
-    for (Int i = 0; i <= ney; ++i) yb[i] = y0 + Real(i*Ly)/ney;
+    for (Int i = 0; i <= nex; ++i) xb[i] = x0 + Real(i)/nex;
+    for (Int i = 0; i <= ney; ++i) yb[i] = y0 + Real(i)/ney;
     SparseTriple op1, op2;
-    setup_demo_problem(xb, yb, dt, op1, np);
-    setup_demo_problem(xb, yb, reverse ? -dt : T, op2, np);
+    setup_demo_problem(xb, yb, dt, op1, np, refine == 0);
+    setup_demo_problem(xb, yb, reverse ? -dt : T, op2, np, refine == 0);
     // Initial conditions.
     std::vector<Real> z0, zs[2];
     set_ic(xb, yb, z0);
