@@ -531,6 +531,35 @@ static Int dof (const Int& nx, const Int& ny,
   return (ye % ny)*nx + (xe % nx);
 }
 
+// Check that the 'integrate' function provides doubly-periodic outputs over the
+// domain of the mesh.
+template <typename Function>
+void check_periodicity (const NonUniMesh2d& mesh, const Real& dt, const Function& integrate) {
+  static const Real tol = 1e5*std::numeric_limits<Real>::epsilon();
+
+  Int nex, ney;
+  mesh.ncell(nex, ney);
+  const auto& xb = mesh.get_mx().get_xb();
+  const auto& yb = mesh.get_my().get_xb();
+
+  const auto check = [&] (Real x0, Real x1, Real y0, Real y1) {
+    Real tx0, ty0, tx1, ty1;
+    integrate(x0, y0, dt, tx0, ty0);
+    integrate(x1, y1, dt, tx1, ty1);
+    require(reldif(tx0 - x0, tx1 - x1) <= tol);
+    require(reldif(ty0 - y0, ty1 - y1) <= tol);
+  };
+  Int n = 7*std::max(nex, ney);
+  for (int i = 0; i <= n; ++i) {
+    const Real a = Real(i)/n, x = a*xb[0] + (1-a)*xb[nex];
+    check(x, x, yb[0], yb[ney]);
+  }
+  for (int i = 0; i <= n; ++i) {
+    const Real a = Real(i)/n, y = a*yb[0] + (1-a)*yb[ney];
+    check(xb[0], xb[nex], y, y);
+  }
+}
+
 template <typename Function>
 void make_ccsl_op_nondiv2d (const NonUniMesh2d& mesh, const Int np,
                             const Function& integrate,
@@ -590,7 +619,8 @@ void make_ccsl_op_nondiv2d (const NonUniMesh2d& mesh, const Int np,
 }
 
 static void setup_demo_problem (const std::vector<Real>& xb, const std::vector<Real>& yb,
-                                const Real dt, SparseTriple& s, const Int np = 4) {
+                                const Real dt, SparseTriple& s, const Int np,
+                                const bool check = false) {
   const Int nex = xb.size() - 1, ney = yb.size() - 1;
   // Shear (nondivergent) flow. Parameter values were obtained from a search for
   // an unstable operator.
@@ -602,6 +632,7 @@ static void setup_demo_problem (const std::vector<Real>& xb, const std::vector<R
     yf = y0 + speed*dt;
   };
   NonUniMesh2d mesh(xb.data(), xb.size()-1, yb.data(), yb.size()-1);
+  if (check) check_periodicity(mesh, dt, integrate);
   make_ccsl_op_nondiv2d(mesh, np, integrate, dt, s);
 }
 
@@ -613,7 +644,7 @@ static Real cubic2d_demo_unstable_problem (const bool unstable = true) {
   for (Int i = 0; i <= nex; ++i) xb[i] = i*d;
   for (Int i = 0; i <= ney; ++i) yb[i] = i*d;
   SparseTriple s;
-  setup_demo_problem(xb, yb, dt, s);
+  setup_demo_problem(xb, yb, dt, s, 4, true);
   sparse2dense(s, op);
   const auto mea = calc_max_eig_amp(ne, op.data(), ne, wrk);
   return mea;
@@ -662,7 +693,7 @@ static Real measure_ooa (const Int np, const bool reverse) {
     for (Int i = 0; i <= nex; ++i) xb[i] = x0 + Real(i*Lx)/nex;
     for (Int i = 0; i <= ney; ++i) yb[i] = y0 + Real(i*Ly)/ney;
     SparseTriple op1, op2;
-    setup_demo_problem(xb, yb,  dt, op1, np);
+    setup_demo_problem(xb, yb, dt, op1, np);
     setup_demo_problem(xb, yb, reverse ? -dt : T, op2, np);
     // Initial conditions.
     std::vector<Real> z0, zs[2];
