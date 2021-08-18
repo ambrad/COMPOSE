@@ -531,42 +531,6 @@ static Int dof (const Int& nx, const Int& ny,
   return (ye % ny)*nx + (xe % nx);
 }
 
-// Check that the 'integrate' function provides doubly-periodic outputs over the
-// domain of the mesh.
-template <typename Function>
-void check_periodicity (const NonUniMesh2d& mesh, const Real& dt, const Function& integrate) {
-  static const Real rtol = 1e2*std::numeric_limits<Real>::epsilon();
-  static const Real atol = std::numeric_limits<Real>::epsilon();
-
-  Int nex, ney;
-  mesh.ncell(nex, ney);
-  const auto& xb = mesh.get_mx().get_xb();
-  const auto& yb = mesh.get_my().get_xb();
-
-  const auto check_error = [=] (Real x0, Real tx0, Real x1, Real tx1) {
-    require(reldif(tx0 - x0, tx1 - x1) <= rtol ||
-            std::abs((tx0 - x0) - (tx1 - x1)) <= atol);
-  };
-
-  const auto check = [&] (Real x0, Real x1, Real y0, Real y1) {
-    Real tx0, ty0, tx1, ty1;
-    integrate(x0, y0, dt, tx0, ty0);
-    integrate(x1, y1, dt, tx1, ty1);
-    check_error(x0, tx0, x1, tx1);
-    check_error(y0, ty0, y1, ty1);
-  };
-
-  Int n = 7*std::max(nex, ney);
-  for (int i = 0; i <= n; ++i) {
-    const Real a = Real(i)/n, x = a*xb[0] + (1-a)*xb[nex];
-    check(x, x, yb[0], yb[ney]);
-  }
-  for (int i = 0; i <= n; ++i) {
-    const Real a = Real(i)/n, y = a*yb[0] + (1-a)*yb[ney];
-    check(xb[0], xb[nex], y, y);
-  }
-}
-
 template <typename Function>
 void make_ccsl_op_nondiv2d (const NonUniMesh2d& mesh, const Int np,
                             const Function& integrate,
@@ -623,6 +587,47 @@ void make_ccsl_op_nondiv2d (const NonUniMesh2d& mesh, const Int np,
 
   assert(s.d.size() == s.ci.size());
   assert(s.rp[s.m] == static_cast<Int>(s.d.size()));
+}
+
+// Check that the 'integrate' function provides doubly-periodic outputs over the
+// domain of the mesh.
+template <typename Function>
+void check_periodicity (const NonUniMesh2d& mesh, const Real& dt, const Function& integrate) {
+  static const Real rtol = 1e2*std::numeric_limits<Real>::epsilon();
+  static const Real atol = std::numeric_limits<Real>::epsilon();
+
+  Int nex, ney;
+  mesh.ncell(nex, ney);
+  const auto& xb = mesh.get_mx().get_xb();
+  const auto& yb = mesh.get_my().get_xb();
+
+  // Check that the domain is [0,1]^2.
+  require(std::abs(xb[nex] - xb[0] - 1) <= atol);
+  require(std::abs(yb[ney] - yb[0] - 1) <= atol);
+
+  // Relative/absolute error checks.
+  const auto check_error = [=] (Real x0, Real tx0, Real x1, Real tx1) {
+    require(reldif(tx0 - x0, tx1 - x1) <= rtol ||
+            std::abs((tx0 - x0) - (tx1 - x1)) <= atol);
+  };
+
+  // Run over the sides of the domain and check periodicity.
+  const auto check = [&] (Real x0, Real x1, Real y0, Real y1) {
+    Real tx0, ty0, tx1, ty1;
+    integrate(x0, y0, dt, tx0, ty0);
+    integrate(x1, y1, dt, tx1, ty1);
+    check_error(x0, tx0, x1, tx1);
+    check_error(y0, ty0, y1, ty1);
+  };
+  Int n = 7*std::max(nex, ney);
+  for (int i = 0; i <= n; ++i) {
+    const Real a = Real(i)/n, x = a*xb[0] + (1-a)*xb[nex];
+    check(x, x, yb[0], yb[ney]);
+  }
+  for (int i = 0; i <= n; ++i) {
+    const Real a = Real(i)/n, y = a*yb[0] + (1-a)*yb[ney];
+    check(xb[0], xb[nex], y, y);
+  }
 }
 
 static void setup_demo_problem (const std::vector<Real>& xb, const std::vector<Real>& yb,
