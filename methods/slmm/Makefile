@@ -1,4 +1,4 @@
-include make.inc.amb
+include make.inc
 
 F90 = gfortran
 
