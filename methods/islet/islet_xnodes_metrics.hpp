@@ -1,26 +1,11 @@
-#ifndef INCLUDE_ISLET_SEARCHXNODES_HPP
-#define INCLUDE_ISLET_SEARCHXNODES_HPP
+#ifndef INCLUDE_ISLET_XNODES_METRICS_HPP
+#define INCLUDE_ISLET_XNODES_METRICS_HPP
 
 #include "islet_types.hpp"
 #include "islet_nodalbasis.hpp"
 
 #include <vector>
 #include <sstream>
-
-struct SearchXnodesOptions {
-  enum Metric { node_position, perturbed_uniform_mesh };
-  Int npt0, npt, nlev, ns;
-  Real tol, pum_metric_thr, node_position_metric_thr;
-  bool threaded, verbose, positive_weights, nondecreasing_weights;
-  Metric metric;
-  SearchXnodesOptions ()
-    : npt0(21), npt(11), nlev(4), ns(3999),
-      tol(1e-14), pum_metric_thr(1e5), node_position_metric_thr(1e5),
-      threaded(true), verbose(true),
-      positive_weights(true), nondecreasing_weights(true),
-      metric(node_position)
-  {}
-};
 
 // l1 only
 Real calc_xnodes_metric(const Nodes& nodes, const Real* const xnodes);
@@ -30,17 +15,6 @@ void calc_xnodes_metrics(const Nodes& nodes, const Real* const xnodes, Real* met
 void calc_lebesgue_consts(const Nodes& nodes, const Real* const xnodes, Real* metrics);
 
 void calc_weights(const Nodes& nodes, const Real* const xnode, Real* const wt);
-
-void search_xnodes(const Nodes& nodes, Real* const xnodes_best,
-                   Real& meam1_best, Real& pum_metric_best, Real& xnodes_metric_best,
-                   Real& wtr_best, const SearchXnodesOptions opts = SearchXnodesOptions());
-
-// Increment each entry of an array idx of length n from 0 to idxlim
-// inclusive. Return true if that is possible; false if
-//     idx[i] = idxlim for i = 0:n-1.
-bool incr(Int* idx, const Int idxlim, const Int n, const bool forward = true);
-
-Int unittest_search_xnodes();
 
 struct MetricsTracker {
   typedef std::shared_ptr<MetricsTracker> Ptr;

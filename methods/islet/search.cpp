@@ -4,9 +4,9 @@
 
 #include "slmm_stuff.hpp"
 #include "islet_tables.hpp"
-#include "npx.hpp"
+#include "islet_npx.hpp"
 #include "islet_maxeigcomp.hpp"
-#include "searchxnodes.hpp"
+#include "islet_xnodes_metrics.hpp"
 #include "islet_pum.hpp"
 #include "islet_util.hpp"
 

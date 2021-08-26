@@ -1,6 +1,6 @@
 include make.inc
 
-SOURCES = islet_isl.cpp islet_tables.cpp npx.cpp islet_maxeigcomp.cpp searchxnodes.cpp islet_pum.cpp studymetrics.cpp islet_nodalbasis.cpp islet_np4.cpp
+SOURCES = islet_isl.cpp islet_tables.cpp islet_npx.cpp islet_maxeigcomp.cpp islet_xnodes_metrics.cpp islet_pum.cpp islet_studymetrics.cpp islet_nodalbasis.cpp islet_np4.cpp
 OBJECTS = $(SOURCES:.cpp=.o)
 .cpp.o:
 	$(CXX) $(CXXFLAGS) -c $< -o $@

@@ -1,5 +1,5 @@
 #include "islet_nodalbasis.hpp"
-#include "npx.hpp"
+#include "islet_npx.hpp"
 #include "islet_util.hpp"
 
 Nodes::Nodes () : np(-1), include_bdy_val(true) {}

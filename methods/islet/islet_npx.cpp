@@ -1,4 +1,4 @@
-#include "npx.hpp"
+#include "islet_npx.hpp"
 
 void op_eval (const InterpMethod& im, const Real a_src, Real* v) {
   using slmm::GLL;

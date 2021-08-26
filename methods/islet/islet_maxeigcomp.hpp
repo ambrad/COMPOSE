@@ -4,7 +4,7 @@
 #include "islet_types.hpp"
 #include "slmm_stuff.hpp"
 #include "islet_interpmethod.hpp"
-#include "npx.hpp"
+#include "islet_npx.hpp"
 
 #include <memory>
 

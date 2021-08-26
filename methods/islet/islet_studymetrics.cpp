@@ -1,5 +1,5 @@
 #include "islet_pum.hpp"
-#include "searchxnodes.hpp"
+#include "islet_xnodes_metrics.hpp"
 
 namespace {
 

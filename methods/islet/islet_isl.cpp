@@ -7,8 +7,8 @@
 #include "islet_tables.hpp"
 #include "islet_util.hpp"
 #include "islet_isl.hpp"
-#include "searchxnodes.hpp"
-#include "npx.hpp"
+#include "islet_xnodes_metrics.hpp"
+#include "islet_npx.hpp"
 
 extern "C" {
   void dgemm_(const char* transa, const char* transb, const int* m,

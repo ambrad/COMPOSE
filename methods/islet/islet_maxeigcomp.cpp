@@ -2,7 +2,7 @@
 
 #include "islet_maxeigcomp.hpp"
 #include "islet_tables.hpp"
-#include "npx.hpp"
+#include "islet_npx.hpp"
 #include "islet_util.hpp"
 
 using slmm::Int;

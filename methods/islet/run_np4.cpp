@@ -1,8 +1,8 @@
 #include "islet_np4.hpp"
 
 #include "islet_util.hpp"
-#include "npx.hpp"
-#include "searchxnodes.hpp"
+#include "islet_npx.hpp"
+#include "islet_xnodes_metrics.hpp"
 #include "islet_maxeigcomp.hpp"
 #include "islet_pum.hpp"
 
