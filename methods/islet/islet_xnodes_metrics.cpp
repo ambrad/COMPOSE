@@ -27,7 +27,7 @@ void calc_xnodes_metrics (const Nodes& nodes, const Real* const xnodes, Real* me
       for (Int i = 0; i < subnp; ++i)
         f *= x - xnodes[active[i]];
       npm1_reg += std::abs(f);
-      npm2_reg += slmm::square(f);
+      npm2_reg += islet::square(f);
       npm_max_reg = std::max(npm_max_reg, std::abs(f));
     }
     const auto fac = factorial(subnp);
@@ -68,7 +68,7 @@ void calc_lebesgue_consts (const Nodes& nodes, const Real* const xnodes, Real* m
         f += std::abs(g);
       }
       npm1_reg += f;
-      npm2_reg += slmm::square(f);
+      npm2_reg += islet::square(f);
       npm_max_reg = std::max(npm_max_reg, f);
     }
     const auto f = (center ? 1 : 2)*(xe - xs)/nseg;

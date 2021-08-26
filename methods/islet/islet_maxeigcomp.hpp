@@ -2,9 +2,11 @@
 #define INCLUDE_ISLET_MAXEIGCOMP_HPP
 
 #include "islet_types.hpp"
-#include "slmm_stuff.hpp"
+#include "islet_util.hpp"
 #include "islet_interpmethod.hpp"
 #include "islet_npx.hpp"
+
+using islet::Array;
 
 #include <memory>
 

@@ -5,10 +5,6 @@
 #include "islet_npx.hpp"
 #include "islet_util.hpp"
 
-using slmm::Int;
-using slmm::Real;
-using slmm::Array;
-
 // LAPACK eigendecomp routine for real unsymmetric matrix.
 typedef int fint;
 extern "C" void dgeev_ (char* jobvl, char* jobvr, fint* n, double* a, int* lda,
@@ -92,7 +88,7 @@ public:
     const Real dx = m.dx();
     const Int nc = m.ncell();
     const Real eps = std::numeric_limits<Real>::epsilon();
-    using slmm::reldif;
+    using islet::reldif;
     Int ne = 0;
     if (reldif(m.toperiodic( 1.7), 0.7) > 10*eps) ++ne;
     if (reldif(m.toperiodic(-0.8), 0.2) > 10*eps) ++ne;
@@ -153,7 +149,7 @@ static void get_matrix (
 
 // A is overwritten.
 static Real cond_2norm (Complex* A, const Int& n, Real* work, const Int& nwork) {
-  SIQK_THROW_IF(nwork < 12*n, "work should be >= 12 n");
+  throw_if(nwork < 12*n, "work should be >= 12 n");
   Real* rwork = work;
   Real* s = work + 5*n;
   Complex* cwork = reinterpret_cast<Complex*>(work + 6*n);
@@ -451,9 +447,9 @@ compute (const InterpMethod& im, const Real& dx, const Int& ne,
           lam[ie*npm1 + i] = Complex(ws.wr[2*i], ws.wr[2*i+1]);
     }
   } else {
-    SIQK_THROW_IF(max_condv || max_defect_ub,
-                  "Only Bloch-wave-based edecomp supports"
-                  " max cond(V) and max defect_ub(lam).");
+    throw_if(max_condv || max_defect_ub,
+             "Only Bloch-wave-based edecomp supports"
+             " max cond(V) and max defect_ub(lam).");
     // Compute eigenvalues of discrete space-time operator with ne cells.
     const Int N = ne*npm1;
     if (static_cast<int>(ws.wr.size()) < N) {

@@ -121,7 +121,7 @@ static void calc_metrics (const Np4InterpMethod& uim, Real metrics[3]) {
         f /= 24;
       }
       npm1_reg += std::abs(f);
-      npm2_reg += slmm::square(f);
+      npm2_reg += islet::square(f);
       npm_max_reg = std::max(npm_max_reg, std::abs(f));
     }
     const auto f = (center ? 1 : 2)*(xe - xs)/nseg;

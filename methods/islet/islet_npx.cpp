@@ -1,18 +1,13 @@
 #include "islet_npx.hpp"
+#include "islet_util.hpp"
 
 void op_eval (const InterpMethod& im, const Real a_src, Real* v) {
-  using slmm::GLL;
   switch (im.type) {
-  case InterpMethod::gll: {
-    const slmm::Basis basis(im.np, 0);
-    GLL gll;
-    gll.eval(basis, a_src, v);
-  } break;
   case InterpMethod::npx: npx<Real>::eval(im.np, a_src, v); break;
   case InterpMethod::npxstab: npxstab<Real>::eval(im.np, a_src, v); break;
   case InterpMethod::user: im.uim->eval(a_src, v); break;
   default:
-    SIQK_THROW_IF(true, "op_eval: invalid im.type " << im.type);
+    throw_if(true, "op_eval: invalid im.type " << im.type);
   }
 }
 
@@ -33,7 +28,7 @@ void npxstab<Scalar>::eval (const Int& np, const Scalar& x, Scalar* const v) {
   case 13: return eval<13,6>({10, 10, 10, 10, 11, 10}, {0, 0, 0, 0, 0, 1}, x, v); // 9
   case 16: return eval<16,8>({12, 13, 13, 13, 13, 14, 13, 12},
                               { 0,  0,  0,  0,  0,  0,  1,  2}, x, v); // 11
-  default: SIQK_THROW_IF(true, "Only 2 <= np <= 13 are supported.");
+  default: throw_if(true, "Only 2 <= np <= 13, np = 16 are supported.");
   }
 }
 

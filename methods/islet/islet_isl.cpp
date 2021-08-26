@@ -213,7 +213,7 @@ struct GllBest : public Operator {
       const Int offst[] = {0,0,0,0,0,1};
       eval_offset(13, xnodes, subnp, offst, x, v);
     } break;
-    default: SIQK_THROW_IF(true, "not impl'ed");
+    default: throw_if(true, "not impl'ed");
     }    
   }
 
@@ -307,7 +307,7 @@ struct UniformOffsetNodalSubset : public Operator {
       const Int offst[] = {0,0,1,2,3,4};
       eval_offset(13, xnodes, subnp, offst, x, v);
     } break;
-    default: SIQK_THROW_IF(true, "not impl'ed");
+    default: throw_if(true, "not impl'ed");
     }    
   }
 };

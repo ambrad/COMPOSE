@@ -2,6 +2,7 @@
 #define INCLUDE_ISLET_NODALBASIS_HPP
 
 #include "islet_types.hpp"
+#include "islet_util.hpp"
 
 class Nodes {
   Int np, nh;

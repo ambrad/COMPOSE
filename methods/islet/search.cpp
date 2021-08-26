@@ -2,7 +2,6 @@
 # define SLMM_NP_GT_4
 #endif
 
-#include "slmm_stuff.hpp"
 #include "islet_tables.hpp"
 #include "islet_npx.hpp"
 #include "islet_maxeigcomp.hpp"
@@ -555,7 +554,7 @@ struct NsbSearchAtom : public UserInterpMethod {
           }
           if (fnd != 2) {
             pr(puf(np) pu(i) pu(x));
-            slmm::prarr("nodes[i]", nodes[i], subnp[i]);
+            islet::prarr("nodes[i]", nodes[i], subnp[i]);
           }
           assert(fnd == 2);
         }
@@ -878,30 +877,12 @@ static void find_nodal_given_best_offset_nodal (
 static void run_general_unittests () {
   int nerr = 0;
   {
-    for (int np = 2; np <= 5; ++np) {
-      slmm::GLL gll;
-      const slmm::Basis b(np, 0);
-      const Real* gll_x, * gll_w;
-      gll.get_coef(b, gll_x, gll_w);
-      Real y1[5], y2[5];
-      Real max_re = 0;
-      for (int i = 0, n = 42; i < n; ++i) {
-        const Real x = -1 + (2.0*i)/n;
-        gll.eval(b, x, y1);
-        eval_lagrange_poly(gll_x, np, x, y2);
-        for (int j = 0; j < np; ++j)
-          max_re = std::max(max_re, slmm::reldif(y1[j], y2[j]));
-      }
-      if (max_re >= 1e-14) ++nerr;
-    }
-  }
-  {
     for (int np = 2; np <= 7; ++np) {
       const auto x = islet::get_x_gll(np);
       const auto w = islet::get_w_gll(np);
       Real sum = 0;
       for (int j = 0; j < np; ++j) sum += w[j];
-      if (slmm::reldif(2, sum) >= 1e-14) ++nerr;
+      if (islet::reldif(2, sum) >= 1e-14) ++nerr;
       for (int j = 0; j < np/2; ++j)
         if (w[j] != w[np-j-1]) ++nerr;
       for (int j = 0; j < np/2; ++j)

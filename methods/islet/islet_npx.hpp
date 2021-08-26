@@ -1,6 +1,7 @@
 #ifndef INCLUDE_ISLET_NPX_HPP
 #define INCLUDE_ISLET_NPX_HPP
 
+#include "islet_util.hpp"
 #include "islet_types.hpp"
 #include "islet_tables.hpp"
 #include "islet_interpmethod.hpp"
@@ -102,13 +103,12 @@ struct npxstab : public npx<Scalar> {
 struct InterpMethod {
   typedef std::shared_ptr<InterpMethod> Ptr;
 
-  enum Type { notype, gll, npx, npxstab, user };
+  enum Type { notype, npx, npxstab, user };
   Int np;
   Type type;
   std::shared_ptr<UserInterpMethod> uim;
 
   static Type convert (const std::string& s) {
-    if (s == "gll") return gll;
     if (s == "npx") return npx;
     if (s == "npxstab") return npxstab;
     if (s == "user") return user;
@@ -116,7 +116,6 @@ struct InterpMethod {
   }
 
   static std::string convert (const Type& t) {
-    if (t == gll) return "gll";
     if (t == npx) return "npx";
     if (t == npxstab) return "npxstab";
     if (t == user) return "user";
